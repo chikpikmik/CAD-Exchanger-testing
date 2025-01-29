@@ -1,16 +1,32 @@
 CC = g++
-CFLAGS = -Wall -std=c++17 -Iinclude
+
+CFLAGS = -Wall -std=c++17 -I include
+LIB_CFLAGS = $(CFLAGS) -fPIC
+
 TARGET = main
+
+LIB_TARGET = libcurves 		# curves
+LIB_NAME = $(LIB_TARGET).so # libcurves.so / libcurves.dll
 
 SRCS = src/Circle.cpp src/CurveFactory.cpp src/Ellipse.cpp src/Helix.cpp
 OBJS = $(patsubst src/%.cpp, build/%.o, $(SRCS))
 
-build/$(TARGET): $(OBJS) app/main.cpp
-	$(CC) $(CFLAGS) -o $@ $(OBJS) app/main.cpp
+all: build/$(TARGET)
+
+# -L build -l curves указывает какую библиотеку и где искать при линковке
+# -Wl,-rpath,'$$ORIGIN' указывает где искать библиотеку при запуске
+build/$(TARGET): app/main.cpp build/$(LIB_NAME)
+	$(CC) $(CFLAGS) -o $@ app/main.cpp -L build -l curves -Wl,-rpath,'$$ORIGIN'
+
+
+# -shared для создания динамической библиотеки
+build/$(LIB_NAME): $(OBJS)
+	@mkdir -p build
+	$(CC) $(LIB_CFLAGS) -shared -o $@ $^ 
 
 build/%.o: src/%.cpp
 	@mkdir -p build
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(LIB_CFLAGS) -c $< -o $@
 
 
 clean:
