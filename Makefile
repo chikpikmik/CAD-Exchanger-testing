@@ -1,12 +1,11 @@
 CC = g++
 
-CFLAGS = -Wall -std=c++17 -I include
+CFLAGS = -Wall -Werror -Wextra -std=c++17 -fopenmp -I include
 LIB_CFLAGS = $(CFLAGS) -fPIC
 
 TARGET = main
 
-LIB_TARGET = libcurves 		# curves
-LIB_NAME = $(LIB_TARGET).so # libcurves.so / libcurves.dll
+LIB_NAME = libcurves.so # libcurves.so / libcurves.dll
 
 SRCS = src/Circle.cpp src/CurveFactory.cpp src/Ellipse.cpp src/Helix.cpp
 OBJS = $(patsubst src/%.cpp, build/%.o, $(SRCS))
@@ -22,7 +21,7 @@ build/$(TARGET): app/main.cpp build/$(LIB_NAME)
 # -shared для создания динамической библиотеки
 build/$(LIB_NAME): $(OBJS)
 	@mkdir -p build
-	$(CC) $(LIB_CFLAGS) -shared -o $@ $^ 
+	$(CC) $(LIB_CFLAGS) -shared -o $@ $^
 
 build/%.o: src/%.cpp
 	@mkdir -p build

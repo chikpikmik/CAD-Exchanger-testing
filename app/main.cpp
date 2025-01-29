@@ -1,9 +1,10 @@
 #include <algorithm> //std::sort
 #include <cmath>     //M_PI
 #include <iostream>
-#include <memory>  //std::shared_ptr
-#include <numeric> //std::accumulate
-#include <vector>  //std::vector
+#include <memory> //std::shared_ptr
+#include <vector> //std::vector
+
+#include <omp.h>
 
 #include "Circle.h"
 #include "Curve.h"
@@ -17,13 +18,13 @@ int main() {
 
     // 3. Напечатать координаты точек и производные всех кривых в контейнере при
     // t=PI/4.
-    double t = M_PI / 4.0;
-    std::cout << "Points and derivatives at t = PI/4:" << std::endl;
+    double t = M_PI / 2.0;
+    std::cout << "Points and derivatives at t = PI/4:\n" << std::endl;
     for (const auto &curve : curves) {
         Point3D point = curve->getPoint(t);
         Vector3D derivative = curve->getDerivative(t);
-        printf("Point: (%.2f, %.2f, %.2f)\n", point.x, point.y, point.z);
-        printf("Derivative: (%.2f, %.2f, %.2f)\n", derivative.x, derivative.y,
+        printf("Point:      (%.2f, %.2f, %.2f)\n", point.x, point.y, point.z);
+        printf("Derivative: (%.2f, %.2f, %.2f)\n\n", derivative.x, derivative.y,
                derivative.z);
     }
 
@@ -44,12 +45,14 @@ int main() {
       });
 
     // 6. Сумма радиусов
-    double totalRadius =
-      std::accumulate(circles.begin(), circles.end(), 0.0,
-                      [](double sum, const std::shared_ptr<Circle> &circle) {
-                          return sum + circle->getRadius();
-                      });
-
+    double totalRadius = 0;
+    #pragma omp parallel
+    {
+        #pragma omp for reduction(+ : totalRadius)
+        for (const auto &circle : circles) {
+            totalRadius += circle->getRadius();
+        }
+    }
     std::cout << "Total radius of circles: " << totalRadius << std::endl;
 
     return 0;
