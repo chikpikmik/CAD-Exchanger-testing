@@ -18,7 +18,7 @@ int main() {
 
     // 3. Напечатать координаты точек и производные всех кривых в контейнере при
     // t=PI/4.
-    double t = M_PI / 2.0;
+    double t = M_PI / 4.0;
     std::cout << "Points and derivatives at t = PI/4:\n" << std::endl;
     for (const auto &curve : curves) {
         Point3D point = curve->getPoint(t);
